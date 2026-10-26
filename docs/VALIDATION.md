@@ -14,7 +14,7 @@ Date: 2026-10-27, Asia/Seoul. Host: macOS 15.6.1, arm64; Python 3.14.7; Node 24.
 | `npm ci --prefix web` | Dependency installation from lockfile succeeded |
 | `npm run build --prefix web` | TypeScript and Vite production build passed |
 | `npm run test:e2e --prefix web` | 5 passed (9.1 seconds on final UI run) |
-| `node ~/dev/korean-language-quality/bin/kolint.mjs --genre documentation README.md` | 0 units with findings, 0 blocking |
+| `node ~/dev/korean-language-quality/bin/kolint.mjs --genre documentation README.md docs/DELIVERY.ko.md` | 0 units with findings, 0 blocking |
 
 Python tests cover deterministic simulation, real data-path parsing of generated Ethernet/802.11/Radiotap captures, PCAPNG, timestamp precision/endianness, station uplink filtering, encrypted header handling without decryption, retry exclusion, allowlists, changing pseudonyms, payload exclusion, malformed/truncated/oversized files, unsupported links, invalid timestamps, source declarations and API Origin/Host restrictions.
 

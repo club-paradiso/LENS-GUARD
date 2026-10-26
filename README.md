@@ -54,7 +54,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-[검증 기록](docs/VALIDATION.md) · [합성 평가 결과](docs/evaluation.json) · [연구와 공개 코드 조사](docs/RESEARCH.md) · [Mac 하드웨어 검증](docs/MACOS.md)
+[개발 결과 보고서](docs/DELIVERY.ko.md) · [검증 기록](docs/VALIDATION.md) · [합성 평가 결과](docs/evaluation.json) · [연구와 공개 코드 조사](docs/RESEARCH.md) · [Mac 하드웨어 검증](docs/MACOS.md)
 
 ## 범위와 한계
 
