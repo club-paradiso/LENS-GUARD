@@ -1,0 +1,10 @@
+{
+  "os": "Darwin",
+  "os_version": "15.6.1",
+  "architecture": "arm64",
+  "tcpdump_installed": true,
+  "wireless_diagnostics_installed": true,
+  "monitor_capture_verified": false,
+  "capture_running": false,
+  "next_step": "Read docs/MACOS.md. Validate collection locally only with an explicit authorized device scope. No capture is started by this command."
+}

@@ -1,0 +1,22 @@
+name: Verify prototype
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: python -m venv .venv && .venv/bin/pip install -r requirements-lock.txt && .venv/bin/pip install --no-build-isolation --no-deps -e .
+      - run: .venv/bin/python -m pytest -q
+      - run: .venv/bin/python -m lens_guard evaluate --output work/evaluation.json
+      - run: npm ci && npm run build && npx playwright install --with-deps chromium && npm run test:e2e
+        working-directory: web

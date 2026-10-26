@@ -1,0 +1,921 @@
+{
+  "provenance": "synthetic_evaluation",
+  "model_version": "rules-0.1",
+  "threshold": 70,
+  "sessions": 96,
+  "physical_devices": 0,
+  "seeds": "100\u2013111; demo uses 42; no training or fitted parameters",
+  "confusion_matrix": {
+    "tp": 24,
+    "fp": 24,
+    "tn": 36,
+    "fn": 12
+  },
+  "metrics": {
+    "accuracy": 0.625,
+    "precision": 0.5,
+    "recall": 0.6666666666666666,
+    "false_positive_rate": 0.4
+  },
+  "per_profile": {
+    "camera_stream": {
+      "sessions": 12,
+      "candidates": 12
+    },
+    "camera_low_rate": {
+      "sessions": 12,
+      "candidates": 0
+    },
+    "camera_motion": {
+      "sessions": 12,
+      "candidates": 12
+    },
+    "video_call": {
+      "sessions": 12,
+      "candidates": 12
+    },
+    "cloud_backup": {
+      "sessions": 12,
+      "candidates": 12
+    },
+    "web_browsing": {
+      "sessions": 12,
+      "candidates": 0
+    },
+    "iot_sensor": {
+      "sessions": 12,
+      "candidates": 0
+    },
+    "idle": {
+      "sessions": 12,
+      "candidates": 0
+    }
+  },
+  "interpretation": "Synthetic scenario coverage only. Not an estimate of physical camera detection accuracy. Abstentions count as non-candidate; inspect status separately. Similar generators create correlated trials, so no statistical confidence interval is claimed.",
+  "rows": [
+    {
+      "profile": "camera_stream",
+      "seed": 100,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.7,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 101,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.3,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 102,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.9,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 103,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.4,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 104,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.5,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 105,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.4,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 106,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.3,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 107,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.9,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 108,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.8,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 109,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.3,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 110,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.1,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_stream",
+      "seed": 111,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.0,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 100,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.0,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 101,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 50.7,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 102,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.3,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 103,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.2,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 104,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 50.5,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 105,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.4,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 106,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 50.8,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 107,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.0,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 108,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 50.8,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 109,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.5,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 110,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.4,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_low_rate",
+      "seed": 111,
+      "camera_label": true,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.8,
+      "outcome": "fn"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 100,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 83.1,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 101,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 91.0,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 102,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 83.1,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 103,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 90.9,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 104,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 80.4,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 105,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 91.0,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 106,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 91.0,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 107,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 85.3,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 108,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 82.9,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 109,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 86.0,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 110,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 88.7,
+      "outcome": "tp"
+    },
+    {
+      "profile": "camera_motion",
+      "seed": 111,
+      "camera_label": true,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 84.6,
+      "outcome": "tp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 100,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.7,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 101,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.3,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 102,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 103,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.4,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 104,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.5,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 105,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.4,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 106,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.3,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 107,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 108,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 98.8,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 109,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.3,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 110,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.1,
+      "outcome": "fp"
+    },
+    {
+      "profile": "video_call",
+      "seed": 111,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.0,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 100,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 101,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 102,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 103,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 104,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 105,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 106,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 107,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 108,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 109,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 110,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "cloud_backup",
+      "seed": 111,
+      "camera_label": false,
+      "predicted_candidate": true,
+      "status": "candidate",
+      "score": 99.9,
+      "outcome": "fp"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 100,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.5,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 101,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 53.1,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 102,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.4,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 103,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.7,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 104,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 52.2,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 105,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 50.4,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 106,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.2,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 107,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.4,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 108,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 52.2,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 109,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 50.6,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 110,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 51.1,
+      "outcome": "tn"
+    },
+    {
+      "profile": "web_browsing",
+      "seed": 111,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "low_evidence",
+      "score": 53.1,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 100,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 101,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 102,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 103,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 104,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 105,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 106,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 107,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 108,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 109,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 110,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "iot_sensor",
+      "seed": 111,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "insufficient",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 100,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 101,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 102,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 103,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 104,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 105,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 106,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 107,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 108,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 109,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 110,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    },
+    {
+      "profile": "idle",
+      "seed": 111,
+      "camera_label": false,
+      "predicted_candidate": false,
+      "status": "no_observation",
+      "score": null,
+      "outcome": "tn"
+    }
+  ]
+}

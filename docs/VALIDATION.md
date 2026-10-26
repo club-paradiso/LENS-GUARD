@@ -1,0 +1,68 @@
+# Validation record
+
+Date: 2026-10-27, Asia/Seoul. Host: macOS 15.6.1, arm64; Python 3.14.7; Node 24.14.0. Real camera captures: **0**. No wireless collection was run. Hardware monitor-mode support remains unverified.
+
+## Executed checks
+
+| Command / action | Result |
+|---|---|
+| `.venv/bin/python -m pytest -q` | 36 passed; one upstream Starlette/httpx TestClient deprecation warning |
+| `.venv/bin/python -m lens_guard evaluate --output docs/evaluation.json` | 96 synthetic sessions; JSON generated |
+| `.venv/bin/python -m lens_guard fixture work/synthetic.pcap` | Synthetic fixture generated |
+| `.venv/bin/python -m lens_guard analyze work/synthetic.pcap --allow-mac 02:00:00:00:00:01 --authorized --source synthetic_file --output work/cli-report.json` | Local CLI end-to-end analysis succeeded |
+| `.venv/bin/pip check` | No broken requirements found |
+| `npm ci --prefix web` | Dependency installation from lockfile succeeded |
+| `npm run build --prefix web` | TypeScript and Vite production build passed |
+| `npm run test:e2e --prefix web` | 5 passed (9.1 seconds on final UI run) |
+| `node ~/dev/korean-language-quality/bin/kolint.mjs --genre documentation README.md` | 0 units with findings, 0 blocking |
+
+Python tests cover deterministic simulation, real data-path parsing of generated Ethernet/802.11/Radiotap captures, PCAPNG, timestamp precision/endianness, station uplink filtering, encrypted header handling without decryption, retry exclusion, allowlists, changing pseudonyms, payload exclusion, malformed/truncated/oversized files, unsupported links, invalid timestamps, source declarations and API Origin/Host restrictions.
+
+Browser tests use the actual local Python service, not mocked API responses. They cover source selection, replay/pause/reset, research navigation, downloaded JSON provenance, authorization form gating, synthetic PCAP import, invalid file errors, clearing results on mode switch, responsive overflow checks and engine updates during a running simulation. The simulation test observes the analyzed window change from 10 to 11 seconds.
+
+## Synthetic result interpretation
+
+| Metric | Result |
+|---|---:|
+| True positives | 24 |
+| False positives | 24 |
+| True negatives | 36 |
+| False negatives | 12 |
+| Accuracy | 62.5% |
+| Precision | 50.0% |
+| Recall | 66.7% |
+| False-positive rate | 40.0% |
+
+Video calls and cloud backups were false positives in all 12 generated trials each. Low-rate cameras were missed in all 12 trials. Motion-camera simulations were flagged in this particular generator; that does not demonstrate robust motion-camera detection. Sensor/idle sessions abstain or have no observations and are counted as non-candidate; inspect row-level statuses. There is no measured physical accuracy.
+
+## Browser and visual review
+
+The in-app browser was attempted with `cua.createBrowserTab("iab", "http://127.0.0.1:8765", {visible:true})`; the operation timed out and reset its kernel. Playwright Chromium was used as the fallback. A later app navigation request was queued, not treated as browser validation evidence.
+
+Target: http://127.0.0.1:8765. Desktop viewport: 1505×1045, matching the generated concept's native width and height; full-page screenshots include content below the viewport. Mobile viewport: 390×844. Meaningful content, page title, absence of runtime page errors, working controls and no horizontal overflow were checked. No framework error overlay appeared. Test runner emitted a harmless NO_COLOR/FORCE_COLOR warning; no application page errors were observed. Chromium is verified; Safari and other engines are not.
+
+The concept was generated with the built-in image tool and saved as `design-concept.png`. Prompt direction: full LENS-GUARD research dashboard; white background, dark text, emerald data visualization, amber candidate/source notices, left rail, data-mode controls, time series, source table and selected-source evidence. No raster image is used as interactive UI.
+
+`view_image` was used to inspect the concept and final desktop/mobile captures. The following deliberate deviations prioritize truthful measurement and privacy:
+
+| Comparison point | Concept → implementation / evidence |
+|---|---|
+| Layout | Left navigation, heading/mode controls, source strip, inline metrics, chart, table/detail split and footer retained. Mobile stacks the table and detail. |
+| Color/container model | White canvas, light neutral rail, fine borders, green trace/actions and amber candidate states retained; no decorative marketing graphics. |
+| Typography | System sans-serif UI and monospace identities; deliberate readable sizing. Font rendering differs from the generated raster. |
+| Copy/provenance | Primary heading and camera-proof caution retained. `Devices` became `Observed sources` and `Selected device` became `Selected source` to avoid physical-device certainty. |
+| Identifiers/icons | Mock MAC addresses and camera/phone icons replaced with per-analysis pseudonyms and neutral source icons. No inferred device type is presented. |
+| Scores/chart | Illustrated 0–1 values and two candidates replaced by actual 0–100 rule outputs and actual synthetic series; current demo has three candidates. Null means insufficient evidence. |
+| Controls | `Run simulation` updates Python analysis at 1 Hz after each response. Replay is explicitly 4× playback of full-window scores. No fake live capture indicator. |
+| Mobile | Initial chart scaled labels too small. ResizeObserver now uses actual available width; latest screenshot confirms readable axes and no page overflow. |
+
+Above-the-fold copy review: changes above are intentional functional/safety deviations, not accidental copy additions. Layout, palette, hierarchy and interactions were verified against the concept with those recorded changes; this is not a pixel-identical raster clone. No remaining material clipping or nonfunctional controls were observed.
+
+## Remaining work and risk
+
+- No physical camera dataset, live capture success, stock-M1 monitor-mode delivery, channel coverage or actual camera accuracy validation.
+- No trained multi-device classifier, CSI, localization, channel hopping or background radio monitoring.
+- Capture container hardening is bounded, not a security audit of every possible malformed PCAPNG variant; no global concurrent-upload budget.
+- Python 3.14/macOS tested locally; other supported Python/OS combinations need their own runs.
+- The GitHub Actions workflow is manual (`workflow_dispatch`) and has not been run. This avoids automatically consuming potentially billable CI minutes.
+- The graph can update simulated analysis in real time; it is not a real-time physical detector.

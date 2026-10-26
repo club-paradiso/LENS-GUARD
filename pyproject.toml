@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lens-guard"
+version = "0.1.0"
+description = "Local, metadata-only experimental Wi-Fi traffic triage"
+requires-python = ">=3.11"
+dependencies = ["fastapi==0.162.0", "uvicorn==0.54.0", "scapy==2.8.0"]
+
+[project.optional-dependencies]
+dev = ["pytest==9.1.1", "httpx==0.28.1"]
+
+[project.scripts]
+lens-guard = "lens_guard.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

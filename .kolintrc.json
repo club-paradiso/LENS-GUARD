@@ -1,0 +1,1 @@
+{"genre":"documentation","exclude":["work/**",".venv/**","web/node_modules/**","web/dist/**"]}
