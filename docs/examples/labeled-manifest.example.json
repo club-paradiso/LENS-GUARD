@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "collector_statement": "I own this Mac and captured only its own traffic on my home network.",
+  "captures": [
+    {
+      "file": "2026-11-01-video-call.pcap",
+      "devices": [{"mac": "02:00:00:00:00:01", "label": "video_call"}],
+      "method": "own_host_tcpdump",
+      "authority": "owned",
+      "authorization_statement": "My own MacBook; one-to-one call with a consenting family member.",
+      "captured_at": "2026-11-01T20:15:00+09:00",
+      "notes": "Placeholder MAC and file name. Copy this file into captures/ and edit it there."
+    }
+  ]
+}

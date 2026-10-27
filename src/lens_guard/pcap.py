@@ -166,12 +166,12 @@ def parse_capture(data, allowed):
                           "visibility": "ethernet_src_dst" if 1 in links else "wifi_infrastructure_tx_rx"}
 
 
-def analyze_capture(data, allowed, declared_source="unverified_file"):
+def analyze_capture(data, allowed, declared_source="unverified_file", *, salt=None):
     if declared_source not in {"synthetic_file", "user_declared_authorized_capture", "unverified_file"}:
         raise ValueError("Invalid source declaration.")
     observations, diagnostics = parse_capture(data, allowed)
     window = diagnostics.pop("window")
-    result = analyze(observations, declared_source, diagnostics=diagnostics, window=window)
+    result = analyze(observations, declared_source, salt=salt, diagnostics=diagnostics, window=window)
     if diagnostics["visibility"] == "ethernet_src_dst":
         result["limitations"].append("Ethernet addresses do not prove a Wi-Fi device or represent all nearby devices. Gateways may aggregate traffic.")
     if not observations:

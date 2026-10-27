@@ -4,6 +4,7 @@ from pathlib import Path
 from .demo import demo_report, write_fixture
 from .evaluation import SPLITS, evaluate
 from .hardware import capabilities
+from .labeled import evaluate_labeled
 from .pcap import MAX_BYTES, analyze_capture
 
 
@@ -21,6 +22,9 @@ def main():
     p.add_argument("--allow-mac", action="append", required=True)
     p.add_argument("--authorized", action="store_true", required=True)
     p.add_argument("--source", choices=["synthetic_file", "user_declared_authorized_capture", "unverified_file"], default="unverified_file")
+    p.add_argument("--output", type=Path)
+    p = sub.add_parser("evaluate-labeled", help="metrics for user-labeled captures of owned or authorized devices")
+    p.add_argument("--manifest", type=Path, required=True)
     p.add_argument("--output", type=Path)
     p = sub.add_parser("fixture")
     p.add_argument("output", type=Path)
@@ -41,6 +45,8 @@ def main():
             with args.file.open("rb") as stream:
                 data = stream.read(MAX_BYTES + 1)
             report = analyze_capture(data, args.allow_mac, args.source)
+        elif args.command == "evaluate-labeled":
+            report = evaluate_labeled(args.manifest)
         elif args.command == "evaluate":
             report = evaluate(SPLITS if args.split == "all" else (args.split,))
         else:
