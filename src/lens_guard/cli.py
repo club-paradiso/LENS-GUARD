@@ -2,7 +2,7 @@ import argparse
 import json
 from pathlib import Path
 from .demo import demo_report, write_fixture
-from .evaluation import evaluate
+from .evaluation import SPLITS, evaluate
 from .hardware import capabilities
 from .pcap import MAX_BYTES, analyze_capture
 
@@ -13,6 +13,9 @@ def main():
     for name in ("demo", "evaluate", "capabilities"):
         p = sub.add_parser(name)
         p.add_argument("--output", type=Path)
+        if name == "evaluate":
+            p.add_argument("--split", choices=["dev", "test", "shift", "all"], default="all",
+                           help="dev tunes rules; test and shift run only after docs/PREREGISTRATION.md is committed")
     p = sub.add_parser("analyze")
     p.add_argument("file", type=Path)
     p.add_argument("--allow-mac", action="append", required=True)
@@ -38,8 +41,10 @@ def main():
             with args.file.open("rb") as stream:
                 data = stream.read(MAX_BYTES + 1)
             report = analyze_capture(data, args.allow_mac, args.source)
+        elif args.command == "evaluate":
+            report = evaluate(SPLITS if args.split == "all" else (args.split,))
         else:
-            report = {"demo": demo_report, "evaluate": evaluate, "capabilities": capabilities}[args.command]()
+            report = {"demo": demo_report, "capabilities": capabilities}[args.command]()
         content = json.dumps(report, indent=2, allow_nan=False) + "\n"
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)

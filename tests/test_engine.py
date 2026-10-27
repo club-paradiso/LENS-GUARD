@@ -2,8 +2,8 @@ import json
 import math
 import pytest
 from lens_guard.engine import Observation, analyze
-from lens_guard.demo import demo_report, scenario
-from lens_guard.evaluation import evaluate
+from lens_guard.demo import demo_report, scenario, scenario_v1
+from lens_guard.evaluation import evaluate, evaluate_v1
 
 
 def test_demo_deterministic_and_honest():
@@ -11,7 +11,7 @@ def test_demo_deterministic_and_honest():
     assert a == demo_report()
     assert a['provenance'] == 'synthetic_demo'
     assert a['simulation']['physical_devices'] == 0
-    assert len(a['devices']) == 5
+    assert len(a['devices']) == 6
     assert '02:00:' not in json.dumps(a)
     assert any(d['status'] == 'candidate' for d in a['devices'])
 
@@ -45,10 +45,16 @@ def test_bounds_and_sorting():
 
 
 def test_known_confounders_are_reported_not_hidden():
-    result = evaluate()
-    assert result['sessions'] == 96
-    assert result['physical_devices'] == 0
-    assert result['confusion_matrix']['fp'] > 0
-    assert result['confusion_matrix']['fn'] > 0
-    assert result['per_profile']['video_call']['candidates'] > 0
-    assert sum(result['confusion_matrix'].values()) == 96
+    result = evaluate(splits=('dev',))
+    dev = result['splits']['dev']
+    assert dev['sessions'] == 180 and result['physical_devices'] == 0
+    assert 'not real-world' in result['disclaimer'] and 'not real-world' in result['interpretation']
+    assert dev['rules-0.2']['per_profile']['live_stream_upload']['fp'] > 0
+    assert dev['rules-0.1']['per_profile']['video_call']['fp'] > 0
+    assert 'test' not in result['splits'] and 'shift' not in result['splits']
+
+
+def test_phase1_rules_reproduced_exactly():
+    assert evaluate_v1()['metrics']['confusion_matrix'] == {'tp': 24, 'fp': 24, 'tn': 36, 'fn': 12}
+    device = analyze(scenario_v1('camera_stream', 100), 'synthetic_evaluation')['devices'][0]
+    assert device['comparison']['rules-0.1']['score'] == 98.7
