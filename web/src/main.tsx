@@ -16,6 +16,26 @@ import {
 } from "lucide-react";
 import "./style.css";
 
+type Model = "rules-0.2" | "rules-0.1";
+type Part = {
+  feature: string;
+  points: number | null;
+  max: number;
+  value: string | null;
+  note: string;
+};
+type LegacyResult = {
+  score: number | null;
+  status: string;
+  reasons: string[];
+  features: {
+    packets: number;
+    active_ratio: number;
+    large_ratio: number;
+    bytes_per_s: number;
+    throughput_cv: number;
+  };
+};
 type Device = {
   id: string;
   score: number | null;
@@ -23,18 +43,51 @@ type Device = {
   series: number[];
   rssi_dbm: number | null;
   reasons: string[];
+  parts: Part[];
+  abstain_reasons: string[];
+  partial_score?: number;
+  direction: {
+    available: boolean;
+    tx_frames: number | null;
+    rx_frames: number | null;
+  };
+  comparison: Record<string, LegacyResult>;
   features: {
     packets: number;
     duration_s: number;
+    uplink_ratio: number | null;
+    periodicity_score: number | null;
+    period_s: number | null;
+    burst_interval_cv: number | null;
+    size_bimodality: number;
     active_ratio: number;
-    large_ratio: number;
+    session_shape: string;
     bytes_per_s: number;
-    throughput_cv: number;
-    mean_packet_bytes: number;
   };
+};
+type Metrics = {
+  confusion_matrix: { tp: number; fp: number; tn: number; fn: number };
+  precision: number | null;
+  recall: number | null;
+  false_positive_rate: number | null;
+  abstention_rate: number | null;
+};
+type Evaluation = {
+  disclaimer: string;
+  rule_fingerprint: string;
+  splits: Record<
+    string,
+    { sessions: number; seeds: string; variant: string } & Record<
+      Model,
+      Metrics
+    >
+  >;
 };
 type Report = {
   provenance: string;
+  provenance_notice: string;
+  model_version: string;
+  thresholds: Record<string, number>;
   ground_truth: string;
   duration_s: number;
   packet_count: number;
@@ -48,7 +101,28 @@ const labels: Record<string, string> = {
   candidate: "Candidate",
   low_evidence: "Low evidence",
   insufficient: "Insufficient",
+  insufficient_direction: "Direction needed",
 };
+const abstainText: Record<string, string> = {
+  insufficient_observation: "Fewer than 100 frames or 10 seconds observed.",
+  insufficient_direction:
+    "Transmit/receive direction is unavailable, so uplink features are withheld rather than set to zero.",
+};
+const models: Model[] = ["rules-0.2", "rules-0.1"];
+const splitNames: Record<string, string> = {
+  dev: "Development",
+  test: "Locked test",
+  shift: "Held-out shift",
+};
+const pct = (v: number | null) => (v === null ? "—" : `${(v * 100).toFixed(0)}%`);
+function result(d: Device, model: Model) {
+  return model === "rules-0.2"
+    ? { score: d.score, status: d.status }
+    : {
+        score: d.comparison["rules-0.1"].score,
+        status: d.comparison["rules-0.1"].status,
+      };
+}
 const provenance: Record<string, string> = {
   synthetic_demo: "SIMULATED DATA — No wireless capture is running.",
   synthetic_file: "SYNTHETIC FILE — No physical measurement.",
@@ -143,7 +217,16 @@ function App() {
   const [allowlist, setAllowlist] = useState("");
   const [authorized, setAuthorized] = useState(false);
   const [source, setSource] = useState("unverified_file");
+  const [model, setModel] = useState<Model>("rules-0.2");
+  const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const generation = useRef(0);
+  useEffect(() => {
+    if (page !== "research" || evaluation) return;
+    fetch("/api/evaluation")
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setEvaluation)
+      .catch(() => setEvaluation(null));
+  }, [page, evaluation]);
   const install = (r: Report) => {
     setReport(r);
     setSelected(r.devices[0]?.id ?? "");
@@ -273,7 +356,10 @@ function App() {
   function exportReport() {
     if (!report) return;
     const url = URL.createObjectURL(
-      new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }),
+      new Blob(
+        [JSON.stringify({ ...report, dashboard_view: model }, null, 2)],
+        { type: "application/json" },
+      ),
     );
     const a = document.createElement("a");
     a.href = url;
@@ -283,7 +369,10 @@ function App() {
   }
   const device = report?.devices.find((d) => d.id === selected);
   const candidates =
-    report?.devices.filter((d) => d.status === "candidate").length ?? 0;
+    report?.devices.filter((d) => result(d, model).status === "candidate")
+      .length ?? 0;
+  const shown = device ? result(device, model) : null;
+  const legacy = device?.comparison["rules-0.1"];
   return (
     <div className="shell">
       <aside>
@@ -344,6 +433,14 @@ function App() {
         </header>
         {page === "research" ? (
           <section className="research">
+            <div className="provenance" role="status">
+              <TriangleAlert size={22} />
+              <strong>
+                SYNTHETIC EVALUATION — Generator behavior, not real-world
+                detection accuracy.
+              </strong>
+              <span>No physical devices.</span>
+            </div>
             <h2>What this prototype can tell you</h2>
             <p>
               LENS-GUARD ranks traffic patterns for further investigation. It
@@ -352,12 +449,68 @@ function App() {
             </p>
             <h2>Explainable baseline</h2>
             <p>
-              The 0–100 score combines sustained activity (35 points), large
-              packets (25), transmission rate (25), and stable throughput (15).
-              A score of 70 starts a candidate review. At least 100 packets and
-              10 seconds are required. These thresholds are experimental and
-              have not been calibrated on physical devices.
+              rules-0.2 scores six parts: uplink share of bytes (30 points),
+              periodic large bursts from 100 ms autocorrelation (25), burst
+              interval regularity (15), a mix of small and full-size packets
+              (10), sustained presence (10) and session shape (10). A score of
+              55 starts a candidate review. Without transmit/receive direction
+              it abstains instead of filling uplink features with zero.
+              rules-0.1 (activity, large packets, rate, stable throughput;
+              threshold 70) is kept for comparison. Thresholds were set on
+              synthetic development data and preregistered; they are not
+              calibrated on physical devices.
             </p>
+            <h2>Synthetic evaluation</h2>
+            {evaluation ? (
+              <div className="table-wrap">
+                <table aria-label="Synthetic evaluation by split and model">
+                  <thead>
+                    <tr>
+                      <th>Split</th>
+                      <th>Model</th>
+                      <th>TP / FP / TN / FN</th>
+                      <th>Precision</th>
+                      <th>Recall</th>
+                      <th>FPR</th>
+                      <th>Abstained</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(evaluation.splits).flatMap(([name, split]) =>
+                      models.map((m) => {
+                        const x = split[m];
+                        const c = x.confusion_matrix;
+                        return (
+                          <tr key={name + m}>
+                            <td>
+                              {splitNames[name] ?? name}
+                              <small className="sub">
+                                {split.sessions} sessions · seeds {split.seeds}
+                              </small>
+                            </td>
+                            <td>{m}</td>
+                            <td>
+                              {c.tp} / {c.fp} / {c.tn} / {c.fn}
+                            </td>
+                            <td>{pct(x.precision)}</td>
+                            <td>{pct(x.recall)}</td>
+                            <td>{pct(x.false_positive_rate)}</td>
+                            <td>{pct(x.abstention_rate)}</td>
+                          </tr>
+                        );
+                      }),
+                    )}
+                  </tbody>
+                </table>
+                <p className="caveat">
+                  <Info size={18} />
+                  {evaluation.disclaimer} Rule fingerprint{" "}
+                  {evaluation.rule_fingerprint}.
+                </p>
+              </div>
+            ) : (
+              <p className="empty">Evaluation summary is unavailable.</p>
+            )}
             <h2>Research foundations</h2>
             <p>
               <a
@@ -396,8 +549,10 @@ function App() {
             </p>
             <h2>Known confounders</h2>
             <p>
-              Video calls and cloud backups may become candidates. Quiet and
-              low-rate cameras may be missed. Ethernet captures do not establish
+              Live-stream uploads look like camera streams and remain
+              candidates. In the held-out synthetic shift, presenter-style
+              video calls and chatty one-second sensors also became candidates.
+              Quiet and low-rate cameras may be missed. Ethernet captures do not establish
               Wi-Fi visibility. Radio signal strength is not a reliable distance
               measurement.
             </p>
@@ -576,22 +731,31 @@ function App() {
               <section className="panel devices">
                 <div className="panel-title">
                   <h2>Sources ({report?.devices.length ?? 0})</h2>
-                  <small>
-                    {report?.packet_count.toLocaleString() ?? 0} eligible
-                    packets
-                  </small>
+                  <div className="modes compact" aria-label="Scoring model">
+                    {models.map((m) => (
+                      <button
+                        key={m}
+                        aria-pressed={model === m}
+                        onClick={() => setModel(m)}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="table-wrap">
-                  <table>
+                  <table aria-label="Observed sources">
                     <thead>
                       <tr>
                         <th>Source</th>
-                        <th>Pattern score</th>
+                        <th>Pattern score · {model}</th>
                         <th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {report?.devices.map((d, i) => (
+                      {report?.devices.map((d, i) => {
+                        const r = result(d, model);
+                        return (
                         <tr
                           key={d.id}
                           className={selected === d.id ? "selected" : ""}
@@ -611,22 +775,23 @@ function App() {
                           </td>
                           <td>
                             <div className="score">
-                              <span>{d.score ?? "—"}</span>
+                              <span>{r.score ?? "—"}</span>
                               <meter
                                 min={0}
                                 max={100}
-                                value={d.score ?? 0}
+                                value={r.score ?? 0}
                                 aria-label={`Pattern score for source ${i + 1}`}
                               />
                             </div>
                           </td>
                           <td>
-                            <span className={`status ${d.status}`}>
-                              {labels[d.status]}
+                            <span className={`status ${r.status}`}>
+                              {labels[r.status] ?? r.status}
                             </span>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                   {!report?.devices.length && (
@@ -658,40 +823,116 @@ function App() {
                         </small>
                       </div>
                     </div>
-                    <h3>Experimental score · not a probability</h3>
+                    <h3>Experimental score · not a probability · {model}</h3>
                     <div className="big-score">
-                      <strong>{device.score ?? "—"}</strong>
-                      <meter min={0} max={100} value={device.score ?? 0} />
+                      <strong>{shown?.score ?? "—"}</strong>
+                      <meter min={0} max={100} value={shown?.score ?? 0} />
                     </div>
-                    <h3>Pattern features</h3>
-                    <dl>
-                      <div>
-                        <dt>Sustained activity</dt>
-                        <dd>
-                          {(device.features.active_ratio * 100).toFixed(0)}%
-                        </dd>
+                    <table className="compare" aria-label="Model comparison">
+                      <thead>
+                        <tr>
+                          <th>Model</th>
+                          <th>Score</th>
+                          <th>Threshold</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {models.map((m) => {
+                          const r = result(device, m);
+                          return (
+                            <tr key={m}>
+                              <td>{m}</td>
+                              <td>{r.score ?? "—"}</td>
+                              <td>{report?.thresholds?.[m] ?? "—"}</td>
+                              <td>{labels[r.status] ?? r.status}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    <h3>Direction</h3>
+                    <p className="direction" aria-label="Direction availability">
+                      {device.direction.available
+                        ? `Available · ${device.direction.tx_frames?.toLocaleString()} sent / ${device.direction.rx_frames?.toLocaleString()} received frames · uplink share ${pct(device.features.uplink_ratio)}`
+                        : "Unavailable · uplink features withheld"}
+                    </p>
+                    {device.abstain_reasons.length > 0 && (
+                      <div className="abstain" role="note">
+                        <strong>Abstained</strong>
+                        <ul>
+                          {device.abstain_reasons.map((r) => (
+                            <li key={r}>{abstainText[r] ?? r}</li>
+                          ))}
+                        </ul>
+                        {device.partial_score !== undefined && (
+                          <small>
+                            Partial score without uplink features:{" "}
+                            {device.partial_score} of 70
+                          </small>
+                        )}
                       </div>
-                      <div>
-                        <dt>Large packets ≥ 1,000 B</dt>
-                        <dd>
-                          {(device.features.large_ratio * 100).toFixed(0)}%
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Throughput variation (CV)</dt>
-                        <dd>{device.features.throughput_cv.toFixed(2)}</dd>
-                      </div>
-                      <div>
-                        <dt>Mean transmission rate</dt>
-                        <dd>
-                          {(device.features.bytes_per_s / 1000).toFixed(1)} kB/s
-                        </dd>
-                      </div>
-                    </dl>
+                    )}
+                    {model === "rules-0.2" ? (
+                      <>
+                        <h3>Score contributions</h3>
+                        <ul className="parts" aria-label="Score contributions">
+                          {device.parts.map((p) => (
+                            <li key={p.feature}>
+                              <div>
+                                <span>{p.feature}</span>
+                                <strong>
+                                  {p.points === null ? "not scored" : p.points}{" "}
+                                  / {p.max}
+                                </strong>
+                              </div>
+                              <meter
+                                min={0}
+                                max={p.max}
+                                value={p.points ?? 0}
+                                aria-label={`${p.feature} points`}
+                              />
+                              <small>{p.value ?? p.note}</small>
+                              {p.value && p.note && <small>{p.note}</small>}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      legacy && (
+                        <>
+                          <h3>rules-0.1 features · transmit side</h3>
+                          <dl>
+                            <div>
+                              <dt>Sustained activity</dt>
+                              <dd>{pct(legacy.features.active_ratio)}</dd>
+                            </div>
+                            <div>
+                              <dt>Large packets ≥ 1,000 B</dt>
+                              <dd>{pct(legacy.features.large_ratio)}</dd>
+                            </div>
+                            <div>
+                              <dt>Throughput variation (CV)</dt>
+                              <dd>{legacy.features.throughput_cv.toFixed(2)}</dd>
+                            </div>
+                            <div>
+                              <dt>Mean transmission rate</dt>
+                              <dd>
+                                {(legacy.features.bytes_per_s / 1000).toFixed(1)}{" "}
+                                kB/s
+                              </dd>
+                            </div>
+                          </dl>
+                        </>
+                      )
+                    )}
                     <details>
                       <summary>Why this score?</summary>
                       <ul>
-                        {device.reasons.map((r) => (
+                        {(model === "rules-0.2"
+                          ? device.reasons
+                          : (legacy?.reasons ?? [])
+                        ).map((r) => (
                           <li key={r}>{r}</li>
                         ))}
                       </ul>
@@ -702,21 +943,25 @@ function App() {
                 )}
                 <p className="caveat">
                   <Info size={18} />
-                  Video calls and cloud backups can look similar.
+                  Live-stream uploads and some calls can look similar.
                 </p>
               </section>
             </div>
             {report && (
               <details className="limits">
                 <summary>Visibility, data origin and limitations</summary>
-                <p>Source: {report.provenance}. Ground truth: not verified.</p>
+                <p>
+                  Source: {report.provenance}. {report.provenance_notice}{" "}
+                  Ground truth: not verified.
+                </p>
                 <ul>
                   {report.limitations.map((l) => (
                     <li key={l}>{l}</li>
                   ))}
                 </ul>
                 <p>
-                  Accepted: {report.packet_count}; skipped outside allowlist:{" "}
+                  Visibility: {String(report.diagnostics.visibility ?? "synthetic")}
+                  . Accepted: {report.packet_count}; skipped outside allowlist:{" "}
                   {String(report.diagnostics.outside_allowlist ?? 0)}; retries
                   skipped: {String(report.diagnostics.retry_frames ?? 0)}.
                 </p>
@@ -732,8 +977,8 @@ function App() {
                 Export report
               </button>
               <span>
-                Research prototype · rules-0.1 · candidates require independent
-                review
+                Research prototype · {report?.model_version ?? "rules-0.2"} ·
+                candidates require independent review
               </span>
             </footer>
           </>
