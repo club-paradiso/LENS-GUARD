@@ -227,6 +227,9 @@ function App() {
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const generation = useRef(0);
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+  useEffect(() => {
     if (page !== "research" || evaluation) return;
     fetch(publicDemo ? "/evaluation.json" : "/api/evaluation")
       .then((r) => (r.ok ? r.json() : null))
@@ -835,7 +838,16 @@ function App() {
                             <button
                               className="device-button"
                               aria-label={`Select source ${i + 1}`}
-                              onClick={() => setSelected(d.id)}
+                              aria-pressed={device?.id === d.id}
+                              onClick={() => {
+                                setSelected(d.id);
+                                if (window.matchMedia("(max-width: 620px)").matches) {
+                                  document.getElementById("source-detail")?.scrollIntoView({
+                                    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                                    block: "start",
+                                  });
+                                }
+                              }}
                             >
                               <Monitor size={17} />
                               <span>
@@ -882,7 +894,7 @@ function App() {
                   <span><strong>Candidate</strong> means a stronger match with the tested traffic pattern, not a confirmed camera. Higher scores are not probabilities.</span>
                 </div>
               </section>
-              <section className="panel detail">
+              <section className="panel detail" id="source-detail">
                 <h2>Why this score?</h2>
                 <p className="panel-description detail-subtitle">Select a source to explore its signals.</p>
                 {device ? (
