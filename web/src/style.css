@@ -1255,3 +1255,43 @@ footer > span { font-size: 11px; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) {
   button { transition: none; }
 }
+
+/* Accessible research vocabulary and honest score color semantics. */
+.skip-link {
+  position: fixed;
+  z-index: 200;
+  top: -80px;
+  left: 12px;
+  padding: 12px 17px;
+  border-radius: 10px;
+  background: #fff;
+  color: #154f3a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .14);
+}
+.skip-link:focus { top: 12px; }
+.score meter::-webkit-meter-optimum-value,
+.big-score meter::-webkit-meter-optimum-value { background: #79938d; }
+.score meter::-moz-meter-bar,
+.big-score meter::-moz-meter-bar { background: #79938d; }
+.score.candidate meter::-webkit-meter-optimum-value,
+.big-score.candidate meter::-webkit-meter-optimum-value { background: #c17a21; }
+.score.candidate meter::-moz-meter-bar,
+.big-score.candidate meter::-moz-meter-bar { background: #c17a21; }
+.glossary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+  margin-top: 15px;
+}
+.glossary > div {
+  padding: 16px;
+  background: #f3f8f5;
+  border: 1px solid #deebe3;
+  border-radius: 12px;
+}
+.glossary strong { font-size: 13px; color: #245c45; }
+.research .glossary p { margin: 7px 0 0; line-height: 1.55; font-size: 12px; }
+.limits, .detail details { font-size: 12px; }
+@media (max-width: 620px) {
+  .glossary { grid-template-columns: 1fr; }
+}
