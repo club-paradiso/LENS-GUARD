@@ -29,6 +29,12 @@ Python 3.11 이상과 Node.js 20.19 이상 또는 22.12 이상이 필요합니�
 
 화면은 영어이며, 사용·개발 문서는 한국어와 영어로 제공합니다. 그래프의 Replay는 완료된 분석을 4배속으로 재생합니다. 실시간 무선 수집이나 지속적인 실측 감시는 구현하지 않았습니다.
 
+## Public web demo (Vercel)
+
+The public website is **static and synthetic only**. During deployment, `scripts/export_public_demo.py` generates `web/public/demo.json` using the real Python rules engine and copies the committed evaluation to `web/public/evaluation.json`. The public React UI reads those snapshots. A public deployment does not expose a PCAP upload or analysis endpoint; PCAP processing remains **local-only** at `http://127.0.0.1:8765`.
+
+Vercel uses the root `vercel.json` to install dependencies from `web/`, build the snapshot and dashboard, and publish `web/dist`. The public demo displays fixed full-window scores, so continuous live simulation is not offered remotely. No real captures are uploaded or stored. This is not a real-world device detection service.
+
 ## PCAP 분석 예제
 
 합성 파일을 직접 만든 뒤 같은 분석 경로를 시험할 수 있습니다.
