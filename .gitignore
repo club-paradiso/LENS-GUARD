@@ -17,3 +17,7 @@ work/
 web/test-results/
 web/playwright-report/
 web/tsconfig.tsbuildinfo
+
+# Build-generated public synthetic snapshots (not source data)
+web/public/demo.json
+web/public/evaluation.json
