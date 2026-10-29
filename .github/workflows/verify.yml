@@ -27,5 +27,6 @@ jobs:
       - run: .venv/bin/python -m pytest -q
       - run: .venv/bin/python -m lens_guard evaluate --output work/evaluation.json
       - run: .venv/bin/python scripts/compare-evaluation.py docs/evaluation.json work/evaluation.json
+      - run: .venv/bin/python scripts/export_public_demo.py
       - run: npm ci && npm run build && npx playwright install --with-deps chromium && npm run test:e2e
         working-directory: web

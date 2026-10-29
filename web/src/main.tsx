@@ -204,6 +204,8 @@ function Chart({ report, cursor }: { report: Report | null; cursor: number }) {
 }
 
 function App() {
+  // Remote hosting is a static synthetic demo. Local hosts retain the Python engine.
+  const publicDemo = !["localhost", "127.0.0.1"].includes(window.location.hostname);
   const [mode, setMode] = useState<"demo" | "pcap">("demo");
   const [page, setPage] = useState("overview");
   const [report, setReport] = useState<Report | null>(null);
@@ -222,7 +224,7 @@ function App() {
   const generation = useRef(0);
   useEffect(() => {
     if (page !== "research" || evaluation) return;
-    fetch("/api/evaluation")
+    fetch(publicDemo ? "/evaluation.json" : "/api/evaluation")
       .then((r) => (r.ok ? r.json() : null))
       .then(setEvaluation)
       .catch(() => setEvaluation(null));
@@ -238,7 +240,7 @@ function App() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("/api/demo");
+      const response = await fetch(publicDemo ? "/demo.json" : "/api/demo");
       if (!response.ok)
         throw new Error("Local analysis engine is unavailable.");
       const r = await response.json();
@@ -324,6 +326,7 @@ function App() {
   }
   async function upload(event: React.FormEvent) {
     event.preventDefault();
+    if (publicDemo) return; // A hosted browser must never upload capture files.
     if (!file) return;
     const id = ++generation.current;
     setLoading(true);
@@ -425,8 +428,10 @@ function App() {
               <button
                 aria-pressed={mode === "pcap"}
                 onClick={() => changeMode("pcap")}
+                disabled={publicDemo}
+                title={publicDemo ? "PCAP analysis is available only in the local application." : undefined}
               >
-                PCAP file
+                {publicDemo ? "PCAP (local only)" : "PCAP file"}
               </button>
             </div>
           )}
@@ -568,12 +573,16 @@ function App() {
                 {report
                   ? provenance[report.provenance]
                   : mode === "demo"
-                    ? "SIMULATED DATA — Loading local demo."
+                    ? publicDemo
+                      ? "SIMULATED DATA — Public static demo, not a camera verdict."
+                      : "SIMULATED DATA — Loading local demo."
                     : "OFFLINE ANALYSIS — Select an authorized capture."}
               </strong>
               <span>
                 {mode === "demo"
-                  ? "Research demonstration only."
+                  ? publicDemo
+                    ? "Engine-generated synthetic sample. No file upload or physical capture. PCAP analysis runs locally only."
+                    : "Research demonstration only."
                   : "No wireless capture is running."}
               </span>
             </div>
@@ -690,7 +699,7 @@ function App() {
                         ? "Replay · 4× · full-window scores"
                         : ""}
                   </small>
-                  {mode === "demo" && (
+                  {mode === "demo" && !publicDemo && (
                     <button onClick={() => setSimulating((v) => !v)}>
                       {simulating ? "Stop simulation" : "Run simulation"}
                     </button>
