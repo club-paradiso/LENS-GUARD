@@ -184,3 +184,47 @@ test("simulation updates engine results over time", async ({ page }) => {
     .click();
   await expect(page.getByRole("status")).toContainText("SIMULATED DATA");
 });
+
+
+test("first-visit guidance, candidate filters and research terms", async ({ page }) => {
+  await page.goto("/");
+  const guide = page.getByRole("region", { name: "Getting started" });
+  await expect(guide.getByText("Three quick steps")).toBeVisible();
+  await expect(guide.getByText("A candidate is a pattern match, not proof of a camera.")).toBeVisible();
+  await guide.getByRole("button", { name: "Hide tips" }).click();
+  await expect(guide.getByText("A candidate is a pattern match, not proof of a camera.")).toBeHidden();
+  await guide.getByRole("button", { name: "Show tips" }).click();
+  await expect(guide.getByText("A candidate is a pattern match, not proof of a camera.")).toBeVisible();
+
+  const sources = page.getByRole("table", { name: "Observed sources" });
+  await expect(sources.locator("tbody tr")).toHaveCount(6);
+  await page.getByRole("group", { name: "Filter sources" })
+    .getByRole("button", { name: /Candidates only/ }).click();
+  await expect(page.getByRole("button", { name: /Candidates only/ })).toHaveAttribute("aria-pressed", "true");
+  const filtered = await sources.locator("tbody tr").count();
+  expect(filtered).toBeLessThan(6);
+  if (filtered) {
+    await expect(sources).toContainText("Candidate");
+    await expect(page.getByRole("heading", { name: "Why this score?" })).toBeVisible();
+  }
+  await page.getByRole("button", { name: "All sources" }).click();
+  await expect(sources.locator("tbody tr")).toHaveCount(6);
+
+  await guide.getByRole("button", { name: "How scoring works" }).click();
+  const terms = page.getByLabel("Terms explained");
+  await expect(terms.getByText("Pattern score")).toBeVisible();
+  await expect(terms.getByText("Held-out shift")).toBeVisible();
+});
+
+test("responsive source filters and keyboard navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Traffic observatory" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "All sources" })).toBeVisible();
+  await page.getByRole("button", { name: "Candidates only", exact: false }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole("button", { name: "All sources" }).focus();
+  await expect(page.getByRole("button", { name: "All sources" })).toBeFocused();
+  await page.setViewportSize({ width: 768, height: 900 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
