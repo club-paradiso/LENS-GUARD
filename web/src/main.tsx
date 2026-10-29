@@ -12,6 +12,8 @@ import {
   RotateCcw,
   Download,
   Info,
+  ArrowRight,
+  ShieldCheck,
   Upload,
 } from "lucide-react";
 import "./style.css";
@@ -220,6 +222,8 @@ function App() {
   const [authorized, setAuthorized] = useState(false);
   const [source, setSource] = useState("unverified_file");
   const [model, setModel] = useState<Model>("rules-0.2");
+  const [showGuide, setShowGuide] = useState(true);
+  const [candidateOnly, setCandidateOnly] = useState(false);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const generation = useRef(0);
   useEffect(() => {
@@ -370,19 +374,26 @@ function App() {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  const device = report?.devices.find((d) => d.id === selected);
   const candidates =
     report?.devices.filter((d) => result(d, model).status === "candidate")
       .length ?? 0;
+  const visibleDevices = (report?.devices ?? [])
+    .map((d, index) => ({ d, index }))
+    .filter(({ d }) => !candidateOnly || result(d, model).status === "candidate");
+  const device = visibleDevices.find(({ d }) => d.id === selected)?.d ?? visibleDevices[0]?.d;
   const shown = device ? result(device, model) : null;
   const legacy = device?.comparison["rules-0.1"];
   return (
     <div className="shell">
       <aside>
-        <div className="wordmark">LENS—GUARD</div>
+        <div className="brand">
+          <div className="wordmark">LENS<span>—</span>GUARD</div>
+          <p>Network pattern lab</p>
+        </div>
         <nav aria-label="Main navigation">
           <button
             className={page === "overview" ? "active" : ""}
+            aria-current={page === "overview" ? "page" : undefined}
             onClick={() => setPage("overview")}
           >
             <Activity size={20} />
@@ -390,6 +401,7 @@ function App() {
           </button>
           <button
             className={page === "research" ? "active" : ""}
+            aria-current={page === "research" ? "page" : undefined}
             onClick={() => setPage("research")}
           >
             <FileText size={20} />
@@ -397,24 +409,23 @@ function App() {
           </button>
         </nav>
         <div className="local">
-          <Wifi size={26} />
+          {publicDemo ? <ShieldCheck size={25} /> : <Wifi size={25} />}
           <div>
-            <strong>Local only</strong>
-            <small>
-              No cloud analysis.
-              <br />
-              No live collection.
-            </small>
+            <strong>{publicDemo ? "Safe sample mode" : "Private local analysis"}</strong>
+            <small>{publicDemo
+              ? "Synthetic data only. No scanning or file uploads."
+              : "Files stay on this computer. No live collection."}</small>
           </div>
         </div>
       </aside>
       <main>
         <header>
-          <div>
-            <h1>
-              {page === "overview" ? "Traffic observatory" : "Research notes"}
-            </h1>
-            <p>Patterns are leads. They are not proof of a camera.</p>
+          <div className="heading-copy">
+            <span className="eyebrow">{page === "overview" ? "EXPLORE THE DEMO" : "HOW THE RESEARCH WORKS"}</span>
+            <h1>{page === "overview" ? "Traffic observatory" : "Research notes"}</h1>
+            <p>{page === "overview"
+              ? "Explore simulated network traffic and the clues behind each pattern score."
+              : "How scores are calculated, what the experiments show, and what they cannot prove."}</p>
           </div>
           {page === "overview" && (
             <div className="modes" aria-label="Data mode">
@@ -564,6 +575,40 @@ function App() {
           </section>
         ) : (
           <>
+            <section className="intro-panel" aria-label="Getting started">
+              <div className="intro-main">
+                <div className="intro-heading">
+                  <span className="intro-kicker">GET TO KNOW THE DATA</span>
+                  <h2>Understand traffic patterns, not identify cameras.</h2>
+                  <p>This is a simulated Wi-Fi traffic sample. Nothing here is being scanned, recorded or identified in real time.</p>
+                  <div className="intro-actions">
+                    <button className="primary" onClick={() => document.getElementById("source-list")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                      Explore the sources <ArrowRight size={16} />
+                    </button>
+                    <button className="quiet-link" onClick={() => setPage("research")}>
+                      How scoring works <ArrowRight size={16} />
+                    </button>
+                  </div>
+                </div>
+                <div className="intro-visual" aria-hidden="true">
+                  <div className="signal signal-a" /><div className="signal signal-b" /><div className="signal signal-c" />
+                  <span className="signal-label">SYNTHETIC DATA</span>
+                </div>
+              </div>
+              <div className="guide-top">
+                <h3>First time here? Three quick steps</h3>
+                <button className="quiet-link" aria-expanded={showGuide} onClick={() => setShowGuide((v) => !v)}>
+                  {showGuide ? "Hide tips" : "Show tips"}
+                </button>
+              </div>
+              {showGuide && (
+                <ol className="guide-steps">
+                  <li><span className="step-number">1</span><span><strong>Explore the sample</strong><small>The chart shows synthetic traffic, not live activity.</small></span></li>
+                  <li><span className="step-number">2</span><span><strong>Select a source</strong><small>Choose a row to see what influences its score.</small></span></li>
+                  <li><span className="step-number">3</span><span><strong>Understand the limits</strong><small>A candidate is a pattern match, not proof of a camera.</small></span></li>
+                </ol>
+              )}
+            </section>
             <div
               className={`provenance ${mode === "pcap" ? "imported" : ""}`}
               role="status"
@@ -663,7 +708,7 @@ function App() {
                   <Monitor />
                 </span>
                 <div>
-                  <small>Observed sources</small>
+                  <small>Sample sources</small>
                   <strong>{report?.devices.length ?? "—"}</strong>
                 </div>
               </div>
@@ -672,7 +717,7 @@ function App() {
                   <TriangleAlert />
                 </span>
                 <div>
-                  <small>Candidates</small>
+                  <small>Patterns to review</small>
                   <strong>{report ? candidates : "—"}</strong>
                 </div>
               </div>
@@ -681,7 +726,7 @@ function App() {
                   <Clock3 />
                 </span>
                 <div>
-                  <small>Observation</small>
+                  <small>Sample duration</small>
                   <strong>
                     {report ? Math.round(report.duration_s) + " s" : "—"}
                   </strong>
@@ -690,7 +735,7 @@ function App() {
             </section>
             <section className="panel traffic">
               <div className="panel-title">
-                <h2>Traffic over time</h2>
+                <div><h2>Traffic over time</h2><p className="panel-description">How much sample data moves each second.</p></div>
                 <div className="playback">
                   <small>
                     {simulating
@@ -737,9 +782,12 @@ function App() {
               </div>
             </section>
             <div className="results">
-              <section className="panel devices">
+              <section className="panel devices" id="source-list">
                 <div className="panel-title">
-                  <h2>Sources ({report?.devices.length ?? 0})</h2>
+                  <div>
+                    <h2>Explore sources ({report?.devices.length ?? 0})</h2>
+                    <p className="panel-description">Select a row to understand the score.</p>
+                  </div>
                   <div className="modes compact" aria-label="Scoring model">
                     {models.map((m) => (
                       <button
@@ -752,6 +800,10 @@ function App() {
                     ))}
                   </div>
                 </div>
+                <div className="source-filters" role="group" aria-label="Filter sources">
+                  <button aria-pressed={!candidateOnly} onClick={() => setCandidateOnly(false)}>All sources</button>
+                  <button aria-pressed={candidateOnly} onClick={() => setCandidateOnly(true)}>Candidates only <span>{candidates}</span></button>
+                </div>
                 <div className="table-wrap">
                   <table aria-label="Observed sources">
                     <thead>
@@ -762,12 +814,12 @@ function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {report?.devices.map((d, i) => {
+                      {visibleDevices.map(({ d, index: i }) => {
                         const r = result(d, model);
                         return (
                         <tr
                           key={d.id}
-                          className={selected === d.id ? "selected" : ""}
+                          className={device?.id === d.id ? "selected source-row" : "source-row"}
                         >
                           <td>
                             <button
@@ -803,19 +855,26 @@ function App() {
                       })}
                     </tbody>
                   </table>
-                  {!report?.devices.length && (
+                  {!visibleDevices.length && (
                     <div className="empty">
                       {loading
                         ? "Analyzing metadata…"
                         : report
-                          ? "No eligible sources matched. Check the allowlist and capture type."
+                          ? candidateOnly
+                            ? "No candidates in this sample. Try All sources."
+                            : "No eligible sources matched. Check the allowlist and capture type."
                           : "Import a capture to inspect authorized sources."}
                     </div>
                   )}
                 </div>
+                <div className="source-caption">
+                  <Info size={16} />
+                  <span><strong>Candidate</strong> means a traffic pattern looks similar to a tested pattern. It does not prove a camera is present.</span>
+                </div>
               </section>
               <section className="panel detail">
-                <h2>Selected source</h2>
+                <h2>Why this score?</h2>
+                <p className="panel-description detail-subtitle">Select a source to explore its signals.</p>
                 {device ? (
                   <>
                     <div className="identity">
@@ -948,11 +1007,11 @@ function App() {
                     </details>
                   </>
                 ) : (
-                  <p className="empty">Select a source to see the evidence.</p>
+                  <p className="empty">{candidateOnly ? "No candidates to inspect. Choose All sources." : "Select a source to see the evidence."}</p>
                 )}
                 <p className="caveat">
                   <Info size={18} />
-                  Live-stream uploads and some calls can look similar.
+                  Video calls and livestreams can produce similar patterns, too.
                 </p>
               </section>
             </div>
