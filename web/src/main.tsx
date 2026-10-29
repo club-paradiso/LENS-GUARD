@@ -171,7 +171,7 @@ function Chart({ report, cursor }: { report: Report | null; cursor: number }) {
       className="chart"
       viewBox={`0 0 ${width} ${height}`}
       role="img"
-      aria-label="Observed transmission volume per second in kilobytes"
+      aria-label={report?.provenance === "synthetic_demo" ? "Simulated traffic volume per second in kilobytes" : "Analyzed traffic volume per second in kilobytes"}
     >
       {[0, 1, 2, 3, 4].map((i) => (
         <g key={i}>
@@ -385,6 +385,7 @@ function App() {
   const legacy = device?.comparison["rules-0.1"];
   return (
     <div className="shell">
+      <a className="skip-link" href="#main-content">Skip to content</a>
       <aside>
         <div className="brand">
           <div className="wordmark">LENS<span>—</span>GUARD</div>
@@ -418,13 +419,15 @@ function App() {
           </div>
         </div>
       </aside>
-      <main>
+      <main id="main-content">
         <header>
           <div className="heading-copy">
             <span className="eyebrow">{page === "overview" ? "EXPLORE THE DEMO" : "HOW THE RESEARCH WORKS"}</span>
             <h1>{page === "overview" ? "Traffic observatory" : "Research notes"}</h1>
             <p>{page === "overview"
-              ? "Explore simulated network traffic and the clues behind each pattern score."
+              ? mode === "demo"
+                ? "Explore simulated network traffic and the clues behind each pattern score."
+                : "Analyze approved capture files locally and inspect the evidence behind each score."
               : "How scores are calculated, what the experiments show, and what they cannot prove."}</p>
           </div>
           {page === "overview" && (
@@ -456,6 +459,11 @@ function App() {
                 detection accuracy.
               </strong>
               <span>No physical devices.</span>
+            </div>
+            <div className="glossary" aria-label="Terms explained">
+              <div><strong>Pattern score</strong><p>A rule-based match from 0–100. It is not a likelihood or a probability.</p></div>
+              <div><strong>Candidate</strong><p>A source worth reviewing because its traffic resembles a test pattern, not a confirmed camera.</p></div>
+              <div><strong>Held-out shift</strong><p>A synthetic stress test with changed conditions; it cannot validate real-world accuracy.</p></div>
             </div>
             <h2>What this prototype can tell you</h2>
             <p>
@@ -575,6 +583,7 @@ function App() {
           </section>
         ) : (
           <>
+            {mode === "demo" && (
             <section className="intro-panel" aria-label="Getting started">
               <div className="intro-main">
                 <div className="intro-heading">
@@ -582,7 +591,7 @@ function App() {
                   <h2>Understand traffic patterns, not identify cameras.</h2>
                   <p>This is a simulated Wi-Fi traffic sample. Nothing here is being scanned, recorded or identified in real time.</p>
                   <div className="intro-actions">
-                    <button className="primary" onClick={() => document.getElementById("source-list")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                    <button className="primary" onClick={() => document.getElementById("source-list")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" })}>
                       Explore the sources <ArrowRight size={16} />
                     </button>
                     <button className="quiet-link" onClick={() => setPage("research")}>
@@ -609,6 +618,7 @@ function App() {
                 </ol>
               )}
             </section>
+            )}
             <div
               className={`provenance ${mode === "pcap" ? "imported" : ""}`}
               role="status"
@@ -835,7 +845,7 @@ function App() {
                             </button>
                           </td>
                           <td>
-                            <div className="score">
+                            <div className={`score ${r.status}`}>
                               <span>{r.score ?? "—"}</span>
                               <meter
                                 min={0}
@@ -869,7 +879,7 @@ function App() {
                 </div>
                 <div className="source-caption">
                   <Info size={16} />
-                  <span><strong>Candidate</strong> means a traffic pattern looks similar to a tested pattern. It does not prove a camera is present.</span>
+                  <span><strong>Candidate</strong> means a stronger match with the tested traffic pattern, not a confirmed camera. Higher scores are not probabilities.</span>
                 </div>
               </section>
               <section className="panel detail">
@@ -892,7 +902,7 @@ function App() {
                       </div>
                     </div>
                     <h3>Experimental score · not a probability · {model}</h3>
-                    <div className="big-score">
+                    <div className={`big-score ${shown?.status ?? ""}`}>
                       <strong>{shown?.score ?? "—"}</strong>
                       <meter min={0} max={100} value={shown?.score ?? 0} />
                     </div>
