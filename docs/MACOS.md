@@ -16,6 +16,10 @@ Observed locally on 2026-10-27: macOS 15.6.1, arm64. `/usr/sbin/tcpdump -D` list
 6. Import only approved data, label its origin, and check accepted counts, link type, duration and RSSI availability. Test a known active camera, a quiet camera, a video call, a backup, and ordinary traffic. Keep independent ground truth outside the packet stream.
 7. Remove the raw capture according to the agreed retention period. Never add it to GitHub. Store only the minimized report when sufficient.
 
+## Own-host capture for labeled confounders
+
+`scripts/capture-own-host.sh` records only this Mac's own frames (`ether host` with the interface's own MAC, 14-byte snap length, time and packet limits) for non-camera labels. The user runs it with sudo and a typed confirmation; nothing in LENS-GUARD calls it. It has not been run during development. See [OWNED_DEVICE_PROTOCOL.ko.md](OWNED_DEVICE_PROTOCOL.ko.md).
+
 ## Not implemented or not verified
 
 Live capture, channel hopping, background monitoring, driver modification, CSI extraction, direction finding, camera localization, silent-device discovery and any operational safety verdict. Apple documentation establishes an available procedure, not that this exact hardware/OS combination successfully delivered usable frames during this session.

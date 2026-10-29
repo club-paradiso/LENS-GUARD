@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import path from "node:path";
 export default defineConfig({
   testDir: "./tests",
   timeout: 60000,
@@ -9,5 +10,7 @@ export default defineConfig({
     url: "http://127.0.0.1:8765/api/health",
     timeout: 120000,
     reuseExistingServer: !process.env.CI,
+    // Do not depend on the editable-install .pth file, which macOS can mark hidden.
+    env: { PYTHONPATH: path.resolve("../src") },
   },
 });

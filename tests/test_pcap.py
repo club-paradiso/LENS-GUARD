@@ -25,7 +25,8 @@ def test_ethernet_and_pcapng(tmp_path,ng):
     r=analyze_capture(data,[MAC], 'synthetic_file')
     assert r['packet_count']==120
     assert r['provenance']=='synthetic_file'
-    assert r['diagnostics']['visibility']=='ethernet_source_only'
+    assert r['diagnostics']['visibility']=='ethernet_src_dst'
+    assert r['diagnostics']['tx_frames']==120
     assert 'PRIVATE-CONTENT' not in json.dumps(r)
     assert MAC not in json.dumps(r)
 
@@ -47,11 +48,12 @@ def test_synthetic_fixture_end_to_end(tmp_path):
 def test_wifi_direction_encryption_retry_rssi(tmp_path):
     def wifi(flags,subtype=0):
         return RadioTap(present='dBm_AntSignal',dBm_AntSignal=-48)/Dot11(type=2,subtype=subtype,FCfield=flags,addr1=AP,addr2=MAC,addr3=AP)/Raw(bytes(1200))
+    # protected To DS, From DS sent by MAC, To DS retry, null data, WDS
     data=capture(tmp_path,[wifi(0x41),wifi(2),wifi(9),wifi(1,4),wifi(3)])
     obs,d=parse_capture(data,[MAC])
-    assert len(obs)==1
+    assert [o.direction for o in obs]==['tx','tx']
     assert obs[0].source==MAC and obs[0].rssi==-48
-    assert d['retry_frames']==1 and d['not_station_uplink']==3
+    assert d['retry_frames']==1 and d['not_infrastructure_data']==2
 
 
 def test_bare_80211(tmp_path):

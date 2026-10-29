@@ -31,5 +31,14 @@ def test_upload_and_errors(tmp_path):
     assert r.status_code==200
     assert r.json()['provenance']=='synthetic_file'
     assert r.json()['devices'][0]['status']=='candidate'
+    assert r.json()['devices'][0]['comparison']['rules-0.1']['status']=='candidate'
+    assert r.json()['provenance_notice']
     assert client.post('/api/analyze',headers=HEADERS,content=b'bad').status_code==422
     assert client.post('/api/analyze',headers={**HEADERS,'x-source-kind':'verified_real'},content=p.read_bytes()).status_code==422
+
+
+def test_evaluation_summary_is_labeled_synthetic():
+    r=client.get('/api/evaluation').json()
+    assert r['provenance']=='synthetic_evaluation' and 'not real-world' in r['disclaimer']
+    assert set(r['splits'])=={'dev','test','shift'} and 'rows' not in r
+    assert r['splits']['test']['rules-0.1']['confusion_matrix']

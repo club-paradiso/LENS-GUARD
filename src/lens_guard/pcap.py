@@ -75,6 +75,7 @@ def parse_capture(data, allowed):
     observations = []
     links = set()
     seen = set()
+    span = [None, None]
     try:
         with RawPcapReader(io.BytesIO(data)) as reader:
             default_link = getattr(reader, "linktype", None)
@@ -94,6 +95,8 @@ def parse_capture(data, allowed):
                     timestamp = ((meta.tshigh << 32) | meta.tslow) / meta.tsresol
                 if not math.isfinite(timestamp):
                     raise ValueError("Invalid capture timestamp.")
+                span = [timestamp if span[0] is None else min(span[0], timestamp),
+                        timestamp if span[1] is None else max(span[1], timestamp)]
                 wirelen = meta.wirelen
                 if wirelen < len(raw) or wirelen > 262144:
                     raise ValueError("Invalid captured packet length.")
@@ -117,19 +120,23 @@ def parse_capture(data, allowed):
                         counts["malformed"] += 1
                         continue
                     frame, flags = header[0], header[1]
-                    # Exclude AP downlink aggregation, WDS, control and null-data frames.
-                    if frame & 3 or (frame >> 2) & 3 != 2 or frame >> 4 not in (0, 8) or flags & 3 != 1:
-                        counts["not_station_uplink"] += 1
+                    # Infrastructure data frames only: exactly one of To DS / From DS. IBSS, WDS,
+                    # management, control and null-data frames are excluded.
+                    if frame & 3 or (frame >> 2) & 3 != 2 or frame >> 4 not in (0, 8) or flags & 3 not in (1, 2):
+                        counts["not_infrastructure_data"] += 1
                         continue
-                    source = header[10:16].hex(":")
-                    if source not in allowed:
+                    # Current hop only: TA (addr2) sends, RA (addr1) receives. For To DS frames TA is
+                    # the SA; for From DS frames RA is the DA. addr3 relays are not counted twice.
+                    roles = [(mac, d) for mac, d in ((header[10:16].hex(":"), "tx"), (header[4:10].hex(":"), "rx"))
+                             if mac in allowed]
+                    if not roles:
                         counts["outside_allowlist"] += 1
                         continue
                     # Retry frames are skipped, even when their original was not captured.
                     if flags & 8:
                         counts["retry_frames"] += 1
                         continue
-                    key = (source, header[22:24], round(timestamp, 3))
+                    key = (header[10:16], header[4:10], header[22:24], round(timestamp, 3))
                     if key in seen:
                         counts["duplicate_frames"] += 1
                         continue
@@ -139,27 +146,34 @@ def parse_capture(data, allowed):
                     if len(raw) < 14:
                         counts["malformed"] += 1
                         continue
-                    source = raw[6:12].hex(":")
-                    if source not in allowed:
+                    roles = [(mac, d) for mac, d in ((raw[6:12].hex(":"), "tx"), (raw[0:6].hex(":"), "rx"))
+                             if mac in allowed]
+                    if not roles:
                         counts["outside_allowlist"] += 1
                         continue
-                observations.append(Observation(timestamp, source, wirelen, rssi))
+                for source, direction in roles:
+                    counts[direction + "_frames"] += 1
+                    observations.append(Observation(timestamp, source, wirelen, rssi, direction))
     except ValueError:
         raise
     except Exception as exc:
         raise ValueError("Capture could not be decoded; check its format and integrity.") from exc
     counts["accepted"] = len(observations)
+    # The capture span (all records, including discarded ones) anchors the analysis window.
     return observations, {**dict(counts), "linktypes": sorted(links),
-                          "visibility": "ethernet_source_only" if 1 in links else "wifi_station_uplink_only"}
+                          "capture_span_s": round(span[1] - span[0], 3) if observations else 0,
+                          "window": span if observations else None,
+                          "visibility": "ethernet_src_dst" if 1 in links else "wifi_infrastructure_tx_rx"}
 
 
-def analyze_capture(data, allowed, declared_source="unverified_file"):
+def analyze_capture(data, allowed, declared_source="unverified_file", *, salt=None):
     if declared_source not in {"synthetic_file", "user_declared_authorized_capture", "unverified_file"}:
         raise ValueError("Invalid source declaration.")
     observations, diagnostics = parse_capture(data, allowed)
-    result = analyze(observations, declared_source, diagnostics=diagnostics)
-    if diagnostics["visibility"] == "ethernet_source_only":
-        result["limitations"].append("Ethernet source MACs do not prove a Wi-Fi device or represent all nearby devices. Gateways may aggregate traffic.")
+    window = diagnostics.pop("window")
+    result = analyze(observations, declared_source, salt=salt, diagnostics=diagnostics, window=window)
+    if diagnostics["visibility"] == "ethernet_src_dst":
+        result["limitations"].append("Ethernet addresses do not prove a Wi-Fi device or represent all nearby devices. Gateways may aggregate traffic.")
     if not observations:
         result["limitations"].append("No eligible packets matched the allowlist. This is not evidence of absence.")
     return result

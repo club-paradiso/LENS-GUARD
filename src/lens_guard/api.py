@@ -1,5 +1,6 @@
 """Loopback application; uploaded captures live only in request memory."""
 
+import json
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -10,6 +11,7 @@ from .pcap import MAX_BYTES, analyze_capture
 
 app = FastAPI(title="LENS-GUARD", docs_url=None, redoc_url=None, openapi_url=None)
 ALLOWED_HOSTS = {"127.0.0.1", "localhost", "testserver"}
+EVALUATION = Path(__file__).resolve().parents[2] / "docs" / "evaluation.json"
 
 
 @app.middleware("http")
@@ -39,6 +41,18 @@ def demo(seed: int = 42, seconds: int = 60):
     if not 10 <= seconds <= 120 or not 0 <= seed <= 100000:
         raise HTTPException(422, "Demo requires 10–120 seconds and seed 0–100000.")
     return demo_report(seed, seconds)
+
+
+@app.get("/api/evaluation")
+def evaluation_summary():
+    """Committed synthetic evaluation without per-session rows."""
+    try:
+        data = json.loads(EVALUATION.read_text())
+    except (OSError, ValueError) as exc:
+        raise HTTPException(404, "No committed evaluation found.") from exc
+    keys = ("schema_version", "provenance", "disclaimer", "physical_devices", "model_version", "comparison_models",
+            "rule_fingerprint", "thresholds", "session_seconds", "camera_profiles", "splits", "interpretation")
+    return {k: data[k] for k in keys if k in data}
 
 
 @app.post("/api/analyze")
